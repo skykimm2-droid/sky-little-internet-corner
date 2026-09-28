@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#08121d">
+  <meta name="description" content="Step into Sky’s little corner of the internet and discover three creative paths.">
+  <title>Sky’s Little Internet Corner</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%2308121d'/%3E%3Cpath d='M32 10c-9 0-16 7-16 16 0 6 3 11 8 14l-5 14h26l-5-14c5-3 8-8 8-14 0-9-7-16-16-16Z' fill='%23e9c873'/%3E%3Ccircle cx='32' cy='26' r='7' fill='%2308121d'/%3E%3Cpath d='m32 33-5 15h10Z' fill='%2308121d'/%3E%3C/svg%3E">
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #08121d;
+      --silver: #e7edf2;
+      --gold: #f2cb72;
+      --crimson: #681f35;
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; width: 100%; min-height: 100%; overflow: hidden; background: var(--ink); }
+    body { font-family: Georgia, 'Times New Roman', serif; color: var(--silver); }
+    button, a { font: inherit; }
+    button { color: inherit; }
+
+    .world {
+      position: fixed;
+      inset: 0;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      background:
+        radial-gradient(circle at 50% 18%, rgba(101, 139, 164, .28), transparent 32%),
+        linear-gradient(145deg, #07101a 0%, #112a2a 54%, #090c18 100%);
+    }
+
+    .world::before {
+      content: '';
+      position: absolute;
+      inset: -3%;
+      background: url('assets/garden.png') center / cover no-repeat;
+      filter: blur(24px) brightness(.3) saturate(.75);
+      transform: scale(1.08);
+      opacity: .72;
+    }
+
+    .scene {
+      position: relative;
+      width: min(100vw, 56.28dvh);
+      height: min(177.68vw, 100dvh);
+      isolation: isolate;
+      opacity: 0;
+      transform: translateY(-3.5%) scale(1.1);
+      transition: opacity .5s ease, transform 1.35s cubic-bezier(.2,.78,.28,1);
+      box-shadow: 0 0 80px rgba(0,0,0,.55);
+    }
+
+    .world.entered .scene { opacity: 1; transform: none; }
+    .scene::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      box-shadow: inset 0 0 40px rgba(1, 5, 10, .52);
+    }
+
+    .garden { width: 100%; height: 100%; display: block; object-fit: fill; }
+
+    .hotspot {
+      position: absolute;
+      z-index: 4;
+      display: grid;
+      place-items: center;
+      min-width: 48px;
+      min-height: 48px;
+      border: 1px solid transparent;
+      border-radius: 18px;
+      background: rgba(10, 20, 27, .02);
+      color: #fff7dc;
+      text-decoration: none;
+      cursor: pointer;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: opacity .45s ease, transform .45s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+    }
+
+    .world.ready .hotspot { opacity: 1; transform: none; }
+    .hotspot::after {
+      content: '';
+      width: clamp(8px, 2.4vw, 13px);
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 0 5px rgba(242,203,114,.18), 0 0 18px 7px rgba(242,203,114,.44);
+      transition: transform .2s ease, box-shadow .2s ease;
+    }
+
+    .hotspot:hover,
+    .hotspot:focus-visible {
+      outline: none;
+      border-color: rgba(255,238,181,.75);
+      background: rgba(18,25,28,.28);
+      box-shadow: 0 0 22px rgba(246,207,114,.22), inset 0 0 12px rgba(0,0,0,.12);
+    }
+    .hotspot:hover::after,
+    .hotspot:focus-visible::after { transform: scale(1.2); box-shadow: 0 0 0 7px rgba(242,203,114,.18), 0 0 24px 10px rgba(242,203,114,.6); }
+
+    .modeling { left: 18%; top: 25%; width: 23%; height: 10%; }
+    .social { left: 72%; top: 17%; width: 23%; height: 10%; }
+    .apps { left: 74%; top: 61.5%; width: 24%; height: 11%; }
+
+    .curtain-layer {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      touch-action: none;
+      user-select: none;
+      overflow: hidden;
+      transition: visibility 0s linear .9s;
+    }
+    .curtain {
+      position: absolute;
+      inset-block: 0;
+      width: 54%;
+      background:
+        linear-gradient(90deg, transparent, rgba(255,255,255,.045) 18%, transparent 32%, rgba(0,0,0,.2) 48%, transparent 64%, rgba(255,255,255,.04) 82%, transparent),
+        linear-gradient(110deg, #210512, #681f35 45%, #2f0718 100%);
+      box-shadow: inset 0 0 70px rgba(0,0,0,.76), 0 0 34px rgba(0,0,0,.8);
+      will-change: transform;
+    }
+    .curtain::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: repeating-linear-gradient(90deg, rgba(0,0,0,.13) 0 8%, transparent 8% 16%);
+      mix-blend-mode: multiply;
+    }
+    .curtain.left { left: 0; transform: translateX(calc(var(--part, 0) * -100%)); }
+    .curtain.right { right: 0; transform: translateX(calc(var(--part, 0) * 100%)); }
+    .curtain-layer.opening .curtain { transition: transform .82s cubic-bezier(.72,.02,.32,1); }
+    .curtain-layer.gone { visibility: hidden; pointer-events: none; }
+
+    .welcome {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      display: grid;
+      place-content: center;
+      justify-items: center;
+      gap: 1rem;
+      padding: 2rem;
+      text-align: center;
+      text-shadow: 0 2px 18px #000;
+      pointer-events: none;
+      opacity: calc(1 - var(--part, 0) * 1.5);
+    }
+    .welcome h1 { margin: 0; max-width: 12ch; font-size: clamp(2rem, 7vw, 4.6rem); font-weight: 400; line-height: .98; letter-spacing: -.025em; }
+    .welcome p { margin: 0; font-family: ui-sans-serif, system-ui, sans-serif; font-size: clamp(.95rem, 2vw, 1.1rem); letter-spacing: .05em; color: #f7e8dd; }
+    .enter {
+      pointer-events: auto;
+      min-height: 48px;
+      padding: .72rem 1.5rem;
+      border: 1px solid rgba(255,229,181,.65);
+      border-radius: 999px;
+      background: rgba(9,12,22,.56);
+      box-shadow: 0 8px 30px rgba(0,0,0,.35);
+      cursor: pointer;
+      transition: background .2s ease, transform .2s ease;
+    }
+    .enter:hover, .enter:focus-visible { background: rgba(242,203,114,.22); outline: 2px solid #fff1bd; outline-offset: 4px; transform: translateY(-2px); }
+
+    .skip {
+      position: fixed;
+      z-index: 30;
+      right: max(1rem, env(safe-area-inset-right));
+      top: max(1rem, env(safe-area-inset-top));
+      min-height: 44px;
+      padding: .55rem .9rem;
+      border: 1px solid rgba(255,255,255,.42);
+      border-radius: 999px;
+      background: rgba(4,10,16,.68);
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+    }
+    .skip[hidden] { display: none; }
+
+    dialog {
+      width: min(88vw, 390px);
+      border: 1px solid rgba(247,210,124,.6);
+      border-radius: 24px;
+      padding: 0;
+      color: #f6efdc;
+      background: linear-gradient(145deg, #172824, #0c1720);
+      box-shadow: 0 26px 80px rgba(0,0,0,.7);
+    }
+    dialog::backdrop { background: rgba(2,7,12,.72); backdrop-filter: blur(5px); }
+    .note { padding: 1.7rem; text-align: center; }
+    .note .keyhole { display: block; margin: 0 auto .8rem; color: var(--gold); font-size: 2.2rem; }
+    .note h2 { margin: 0 0 .55rem; font-size: 1.55rem; font-weight: 400; }
+    .note p { margin: 0 0 1.25rem; font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.55; color: #dce4da; }
+    .note button { min-height: 46px; padding: .65rem 1.2rem; border: 1px solid rgba(247,210,124,.58); border-radius: 999px; background: rgba(247,210,124,.1); cursor: pointer; }
+    .note button:focus-visible { outline: 2px solid #fff1bd; outline-offset: 3px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: .01ms !important; }
+      .scene { transform: none; }
+    }
+    @media (max-width: 500px) {
+      .welcome { padding-inline: 1rem; }
+      .welcome p { max-width: 24ch; line-height: 1.45; }
+      .hotspot { border-radius: 13px; }
+      .modeling { left: 14%; width: 30%; }
+      .social { left: 69%; width: 29%; }
+      .apps { left: 70%; width: 29%; }
+    }
+  </style>
+</head>
+<body>
+  <main class="world" id="world" aria-label="Sky’s Little Internet Corner">
+    <section class="scene" aria-label="Moonlit garden with three portfolio paths">
+      <img class="garden" src="assets/garden.png" alt="A moonlit storybook garden with signs leading to modeling, social, and software projects.">
+      <a class="hotspot modeling" href="https://skykimportfolio.my.canva.site/" target="_blank" rel="noopener noreferrer" aria-label="Open Modeling Portfolio in a new tab"></a>
+      <a class="hotspot social" href="https://canva.link/3g93devirml6sk0" target="_blank" rel="noopener noreferrer" aria-label="Open Social Portfolio in a new tab"></a>
+      <button class="hotspot apps" id="appsHotspot" type="button" aria-label="Discover Apps and Software Projects — coming soon"></button>
+    </section>
+  </main>
+
+  <div class="curtain-layer" id="curtainLayer" aria-label="Entrance curtain">
+    <div class="curtain left" aria-hidden="true"></div>
+    <div class="curtain right" aria-hidden="true"></div>
+    <div class="welcome">
+      <h1>Sky’s Little Internet Corner</h1>
+      <p>Part the curtains to step inside.</p>
+      <button class="enter" id="enterButton" type="button">Enter the garden</button>
+    </div>
+  </div>
+  <button class="skip" id="skipButton" type="button" hidden>Skip</button>
+
+  <dialog id="comingSoon" aria-labelledby="soonTitle">
+    <div class="note">
+      <span class="keyhole" aria-hidden="true">⌘</span>
+      <h2 id="soonTitle">A little workshop is waking up.</h2>
+      <p>Apps &amp; software projects are coming soon.</p>
+      <button id="closeSoon" type="button">Back to the garden</button>
+    </div>
+  </dialog>
+
+  <script>
+    (() => {
+      const world = document.getElementById('world');
+      const curtains = document.getElementById('curtainLayer');
+      const enterButton = document.getElementById('enterButton');
+      const skipButton = document.getElementById('skipButton');
+      const appsHotspot = document.getElementById('appsHotspot');
+      const dialog = document.getElementById('comingSoon');
+      const closeSoon = document.getElementById('closeSoon');
+      const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+      let dragging = false;
+      let startX = 0;
+      let progress = 0;
+      let entering = false;
+
+      const paint = () => curtains.style.setProperty('--part', progress.toFixed(3));
+      const finish = (instant = false) => {
+        if (entering) return;
+        entering = true;
+        progress = 1;
+        paint();
+        curtains.classList.add('opening');
+        skipButton.hidden = reduceMotion || instant;
+        if (reduceMotion || instant) {
+          curtains.classList.add('gone');
+          world.classList.add('entered', 'ready');
+          skipButton.hidden = true;
+          document.querySelector('.modeling').focus({ preventScroll: true });
+          return;
+        }
+        requestAnimationFrame(() => world.classList.add('entered'));
+        setTimeout(() => curtains.classList.add('gone'), 850);
+        setTimeout(() => {
+          world.classList.add('ready');
+          skipButton.hidden = true;
+        }, 1400);
+      };
+
+      curtains.addEventListener('pointerdown', (event) => {
+        if (event.target.closest('button')) return;
+        dragging = true;
+        startX = event.clientX;
+        curtains.setPointerCapture(event.pointerId);
+      });
+      curtains.addEventListener('pointermove', (event) => {
+        if (!dragging || entering) return;
+        progress = Math.min(1, Math.max(0, Math.abs(event.clientX - startX) / (innerWidth * .34)));
+        paint();
+      });
+      curtains.addEventListener('pointerup', () => {
+        if (!dragging) return;
+        dragging = false;
+        if (progress > .36) finish();
+        else { progress = 0; curtains.classList.add('opening'); paint(); setTimeout(() => curtains.classList.remove('opening'), 850); }
+      });
+      curtains.addEventListener('click', (event) => {
+        if (!entering && !event.target.closest('button') && !dragging) finish();
+      });
+      enterButton.addEventListener('click', () => finish());
+      skipButton.addEventListener('click', () => finish(true));
+      addEventListener('keydown', (event) => {
+        if (event.code === 'Space' && !entering && !event.target.matches('button, a')) {
+          event.preventDefault();
+          finish();
+        }
+      });
+
+      appsHotspot.addEventListener('click', () => dialog.showModal());
+      closeSoon.addEventListener('click', () => dialog.close());
+      dialog.addEventListener('click', (event) => {
+        if (event.target === dialog) dialog.close();
+      });
+    })();
+  </script>
+</body>
+</html>
