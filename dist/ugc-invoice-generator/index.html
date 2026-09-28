@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free UGC Invoice Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --lilac:#c7b8fb; --lilac-bg:#f4f0ff;
+    --sky:#a9d6ff;   --sky-bg:#ecf6ff;
+    --peach:#ffd2a6; --peach-bg:#fff5ea;
+    --mint:#a3edcd;  --mint-bg:#ecfbf3;
+    --pink:#ffc4dd;  --pink-bg:#fff0f6;
+    --violet:#7c6cf0; --violet-dk:#6354e0;
+    --ink:#1d2030; --muted:#6a6f86; --faint:#9aa0b8;
+    --field-border:#e4e1f2; --field-bg:#ffffff;
+    --card:#ffffff;
+    --doc-ink:#16181d; --doc-muted:#6b7280; --doc-line:#e6e8ec;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    font-family:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+    color:var(--ink);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;
+    background:linear-gradient(165deg,#f3ecff 0%,#ecf2ff 38%,#eafaf3 72%,#fff3ec 100%);
+    background-attachment:fixed;min-height:100vh;
+  }
+  input,textarea,select,button{font-family:inherit;color:inherit;font-size:14px;}
+  h1,h2,h3{font-family:'Poppins',sans-serif;margin:0;}
+
+  /* ---------- header ---------- */
+  header{max-width:760px;margin:0 auto;padding:48px 22px 14px;text-align:center;}
+  .creator-credit{display:inline-flex;align-items:center;gap:9px;margin-bottom:18px;color:var(--muted);font-size:12px;font-weight:600;}
+  .projects-btn{display:inline-flex;align-items:center;gap:5px;background:#fff;border:1px solid var(--field-border);
+    color:var(--violet-dk);font-weight:700;font-size:12px;padding:7px 12px;border-radius:999px;text-decoration:none;
+    box-shadow:0 2px 8px rgba(124,108,240,.10);transition:transform .12s,box-shadow .15s,border-color .15s;}
+  .projects-btn:hover{transform:translateY(-1px);border-color:#cfc7f5;box-shadow:0 5px 14px rgba(124,108,240,.18);}
+  .projects-btn:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+  header h1{font-size:33px;font-weight:700;letter-spacing:-0.02em;line-height:1.08;}
+  header h1 .grad{background:linear-gradient(90deg,#7c6cf0,#e069b8 60%,#f2994a);-webkit-background-clip:text;background-clip:text;color:transparent;}
+  header p{color:var(--muted);font-size:15px;max-width:520px;margin:13px auto 0;}
+
+  /* ---------- form ---------- */
+  .form-wrap{max-width:760px;margin:0 auto;padding:24px 22px 8px;}
+  .card{
+    background:var(--card);border:1px solid rgba(228,225,242,.9);border-radius:var(--radius);
+    padding:22px 24px 24px;margin-bottom:18px;
+    box-shadow:0 1px 2px rgba(40,30,80,.04),0 14px 30px rgba(60,50,110,.06);
+  }
+  .card-head{display:flex;align-items:center;gap:11px;margin-bottom:18px;}
+  .chip{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex:none;}
+  .chip svg{width:18px;height:18px;}
+  .card-head h2{font-size:16px;font-weight:600;letter-spacing:-0.01em;}
+  .card-head .sub{font-size:12px;color:var(--faint);font-weight:500;margin-top:1px;}
+  .c-creator .chip{background:var(--lilac-bg);color:#6b54d8;}
+  .c-brand   .chip{background:var(--sky-bg);color:#2f7fd1;}
+  .c-inv     .chip{background:var(--peach-bg);color:#d98321;}
+  .c-items   .chip{background:var(--mint-bg);color:#1ba066;}
+  .c-pay     .chip{background:var(--pink-bg);color:#d24f8a;}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;}
+  .field{display:flex;flex-direction:column;gap:6px;}
+  .field.full{grid-column:1 / -1;}
+  .field label{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.01em;}
+  .field label .opt{color:var(--faint);font-weight:500;}
+  .field input,.field textarea,.field select{
+    border:1.5px solid var(--field-border);background:var(--field-bg);border-radius:10px;
+    padding:10px 12px;font-size:14px;font-weight:500;transition:border-color .15s,box-shadow .15s;width:100%;
+  }
+  .field textarea{resize:vertical;min-height:64px;line-height:1.5;font-weight:400;}
+  .field input::placeholder,.field textarea::placeholder{color:var(--faint);font-weight:400;}
+  .field input:focus,.field textarea:focus,.field select:focus{
+    outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(124,108,240,.16);
+  }
+  .date-wrap{position:relative;}
+  .date-wrap > input:not(.date-native){padding-right:42px;}
+  .date-native{position:absolute;inset:0;width:100%;height:100%;opacity:0;pointer-events:none;border:none;padding:0;margin:0;}
+  .cal-btn{position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:transparent;cursor:pointer;
+    color:var(--muted);width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:background .12s,color .12s;}
+  .cal-btn svg{width:17px;height:17px;}
+  .cal-btn:hover{background:var(--lilac-bg);color:var(--violet-dk);}
+  .cal-btn:focus-visible{outline:2px solid var(--violet);outline-offset:2px;}
+
+  /* items */
+  .items-head,.item-row{display:grid;grid-template-columns:1fr 72px 116px 104px 30px;gap:10px;align-items:center;}
+  .items-head{padding:0 2px 8px;font-size:11px;font-weight:600;color:var(--faint);text-transform:uppercase;letter-spacing:.05em;}
+  .items-head .r{text-align:right;}
+  .item-row{margin-bottom:10px;}
+  .item-row input{border:1.5px solid var(--field-border);background:#fff;border-radius:9px;padding:9px 11px;font-size:13.5px;font-weight:500;width:100%;transition:border-color .15s,box-shadow .15s;}
+  .item-row input:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(124,108,240,.16);}
+  .item-row .num{text-align:right;}
+  .item-amt{text-align:right;font-weight:600;font-variant-numeric:tabular-nums;color:var(--muted);font-size:13.5px;white-space:nowrap;}
+  .row-x{border:none;background:none;cursor:pointer;color:var(--faint);width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:17px;line-height:1;transition:background .12s,color .12s;}
+  .row-x:hover{background:#ffe3ec;color:#d24f8a;}
+  .add-item{margin-top:4px;border:1.5px dashed var(--field-border);background:transparent;color:var(--muted);border-radius:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:border-color .15s,color .15s,background .15s;}
+  .add-item:hover{border-color:var(--violet);color:var(--violet-dk);background:var(--lilac-bg);}
+
+  /* sub-sections: content / add-ons */
+  .subsec + .subsec{margin-top:24px;}
+  .subsec-head{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:700;color:var(--ink);letter-spacing:.04em;text-transform:uppercase;margin-bottom:12px;}
+  .subsec-head .sdot{width:8px;height:8px;border-radius:50%;flex:none;}
+  .sdot.content{background:#1ba066;} .sdot.addon{background:#d98321;}
+
+  /* usage: low-key sub-sub-section nested under content */
+  .subsub{margin:18px 0 2px;padding:14px 0 2px 16px;border-left:2px solid #ececf2;}
+  .subsub-head{font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-bottom:11px;}
+  .dur-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:10px;}
+  .dur-chip{border:1.5px solid var(--field-border);background:#fff;color:var(--muted);border-radius:8px;padding:7px 13px;font-size:12.5px;font-weight:600;cursor:pointer;transition:border-color .12s,background .12s,color .12s;}
+  .dur-chip:hover{border-color:#c7c2d8;color:var(--ink);}
+  .dur-chip.active{background:var(--ink);border-color:var(--ink);color:#fff;}
+  .usage-row2{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;}
+  .usage-desc{border:1.5px solid var(--field-border);background:#fff;border-radius:9px;padding:9px 11px;font-size:13.5px;font-weight:500;width:100%;transition:border-color .15s,box-shadow .15s;}
+  .usage-desc:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(124,108,240,.16);}
+  .pct-cell{display:flex;align-items:center;gap:7px;}
+  .usage-pct{width:58px;text-align:right;border:1.5px solid var(--field-border);background:#fff;border-radius:9px;padding:9px 10px;font-size:13.5px;font-weight:600;transition:border-color .15s,box-shadow .15s;}
+  .usage-pct:focus{outline:none;border-color:var(--violet);box-shadow:0 0 0 3px rgba(124,108,240,.16);}
+  .pct-suffix{font-size:12px;color:var(--muted);font-weight:600;white-space:nowrap;}
+  .usage-amt{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;color:var(--ink);font-size:14px;white-space:nowrap;min-width:84px;}
+  .usage-hint{font-size:11.5px;color:var(--faint);font-weight:500;margin-top:9px;}
+  .invoice tr.grp td{padding:16px 10px 7px;font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--doc-muted);border-bottom:1px solid var(--doc-line);}
+  .invoice tr.grp:first-child td{padding-top:2px;}
+  @media (max-width:680px){
+    .usage-row2{grid-template-columns:1fr;gap:9px;}
+    .usage-amt{text-align:left;min-width:0;}
+  }
+
+  .options{display:flex;flex-wrap:wrap;gap:18px;align-items:center;margin-top:20px;padding-top:18px;border-top:1px dashed var(--field-border);}
+  .remember-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin-top:20px;padding-top:18px;border-top:1px dashed var(--field-border);}
+  .remember-sub{font-size:12px;color:var(--faint);font-weight:500;flex:1;min-width:200px;}
+  .switch{position:relative;display:inline-flex;align-items:center;cursor:pointer;gap:9px;user-select:none;font-weight:600;color:var(--ink);font-size:13.5px;}
+  .switch input{position:absolute;opacity:0;width:0;height:0;}
+  .track{width:38px;height:22px;border-radius:22px;background:#d9d6ea;transition:background .18s;flex:none;}
+  .track::after{content:"";position:absolute;left:2px;top:2px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:transform .18s;}
+  .switch input:checked + .track{background:var(--violet);}
+  .switch input:checked + .track::after{transform:translateX(16px);}
+  .switch input:focus-visible + .track{outline:2px solid var(--violet);outline-offset:2px;}
+  .cur-pick{display:inline-flex;align-items:center;gap:8px;font-weight:600;color:var(--ink);font-size:13.5px;}
+  .cur-pick select{border:1.5px solid var(--field-border);background:#fff;border-radius:9px;padding:7px 9px;font-weight:600;cursor:pointer;}
+
+  /* generate */
+  .generate-bar{max-width:760px;margin:6px auto 0;padding:8px 22px 60px;}
+  .generate-btn{width:100%;border:none;cursor:pointer;border-radius:14px;padding:16px 22px;
+    font-family:'Poppins',sans-serif;font-size:16px;font-weight:600;color:#fff;
+    background:linear-gradient(95deg,#7c6cf0,#9a5cf0 55%,#e069b8);
+    box-shadow:0 8px 22px rgba(124,108,240,.34);transition:transform .12s,box-shadow .15s;
+    display:flex;align-items:center;justify-content:center;gap:10px;}
+  .generate-btn:hover{transform:translateY(-1px);box-shadow:0 12px 28px rgba(124,108,240,.42);}
+  .generate-btn:active{transform:translateY(0);}
+  .save-note{text-align:center;font-size:12px;color:var(--faint);margin-top:13px;}
+
+  /* ---------- output ---------- */
+  #output{max-width:860px;margin:0 auto;padding:0 22px 90px;}
+  #output.is-hidden{display:none;}
+  .output-actions{display:flex;flex-wrap:wrap;align-items:center;gap:11px;margin-bottom:18px;}
+  .output-actions .ttl{font-family:'Poppins',sans-serif;font-weight:600;font-size:15px;margin-right:auto;display:flex;align-items:center;gap:9px;}
+  .output-actions .ttl .live{font-family:'Inter';font-size:11.5px;font-weight:500;color:var(--faint);}
+  .dl{border:1.5px solid var(--field-border);background:#fff;border-radius:11px;padding:10px 16px;font-weight:600;font-size:13.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;transition:transform .12s,box-shadow .15s,background .15s;}
+  .dl svg{width:15px;height:15px;}
+  .dl:hover{transform:translateY(-1px);box-shadow:0 6px 16px rgba(60,50,110,.12);}
+  .dl.pdf{color:var(--violet-dk);border-color:#d8d2f7;background:var(--lilac-bg);}
+  .dl.word{color:#fff;border-color:transparent;background:linear-gradient(95deg,#7c6cf0,#9a5cf0);}
+  .dl.edit{color:var(--muted);background:transparent;border-color:transparent;}
+  .dl.edit:hover{background:#fff;box-shadow:none;color:var(--ink);}
+
+  /* ---------- the invoice document (clean, mono) ---------- */
+  .invoice{
+    background:#fff;color:var(--doc-ink);
+    border:1px solid var(--doc-line);border-radius:14px;
+    box-shadow:0 2px 6px rgba(20,24,33,.05),0 22px 50px rgba(20,24,33,.10);
+    padding:56px 60px 52px;font-size:14px;
+  }
+  .invoice .doc-head{display:flex;justify-content:space-between;align-items:flex-start;gap:30px;margin-bottom:40px;}
+  .invoice .doc-title{font-family:'Inter',sans-serif;font-size:34px;font-weight:700;letter-spacing:-0.03em;line-height:1;}
+  .invoice .meta{display:grid;grid-template-columns:auto auto;gap:6px 16px;font-size:13.5px;}
+  .invoice .meta .k{color:var(--doc-muted);font-weight:600;text-transform:uppercase;font-size:11px;letter-spacing:.05em;text-align:right;align-self:center;}
+  .invoice .meta .v{font-weight:600;}
+  .invoice .parties{display:grid;grid-template-columns:1fr 1fr;gap:34px;margin-bottom:34px;}
+  .invoice .eyebrow{font-size:11px;font-weight:700;color:var(--doc-muted);text-transform:uppercase;letter-spacing:.1em;margin-bottom:8px;}
+  .invoice .pname{font-size:16px;font-weight:600;margin-bottom:3px;letter-spacing:-0.01em;}
+  .invoice .pdetails{white-space:pre-line;color:#3a3f49;font-size:13.5px;}
+  .invoice table{width:100%;border-collapse:collapse;}
+  .invoice thead th{font-size:11px;font-weight:700;color:var(--doc-muted);text-transform:uppercase;letter-spacing:.06em;text-align:left;padding:0 10px 10px;border-bottom:1.5px solid var(--doc-ink);}
+  .invoice th.r,.invoice td.r{text-align:right;}
+  .invoice tbody td{padding:11px 10px;border-bottom:1px solid var(--doc-line);vertical-align:top;}
+  .invoice td.amt{font-weight:600;font-variant-numeric:tabular-nums;white-space:nowrap;}
+  .invoice .totals{display:flex;justify-content:flex-end;margin-top:20px;}
+  .invoice .totals-inner{width:300px;}
+  .invoice .trow{display:flex;justify-content:space-between;padding:7px 0;font-size:13.5px;}
+  .invoice .trow .lbl{color:var(--doc-muted);font-weight:500;}
+  .invoice .trow .val{font-weight:600;font-variant-numeric:tabular-nums;}
+  .invoice .trow.grand{border-top:1.5px solid var(--doc-ink);margin-top:5px;padding-top:13px;font-size:17px;}
+  .invoice .trow.grand .lbl{color:var(--doc-ink);font-weight:700;}
+  .invoice .trow.grand .val{font-weight:700;}
+  .invoice .pay-block{margin-top:44px;border-top:1px solid var(--doc-line);padding-top:22px;}
+  .invoice .pay-block .pdetails{font-size:13.5px;color:var(--doc-ink);}
+  .invoice .notes-block{margin-top:22px;}
+
+  /* ---------- print: only the invoice ---------- */
+  @media print{
+    @page{margin:14mm;}
+    body{background:#fff;}
+    header,.form-wrap,.generate-bar,.output-actions{display:none !important;}
+    #output{padding:0;max-width:none;}
+    #output.is-hidden{display:none !important;}
+    .invoice{border:none;border-radius:0;box-shadow:none;padding:0;}
+    tr{page-break-inside:avoid;}
+    .invoice thead{display:table-header-group;}
+  }
+
+  @media (max-width:680px){
+    .grid{grid-template-columns:1fr;}
+    .items-head{display:none;}
+    .item-row{grid-template-columns:1fr 1fr;gap:8px;padding:12px;border:1px solid var(--field-border);border-radius:12px;margin-bottom:12px;position:relative;}
+    .item-row .desc-cell{grid-column:1 / -1;}
+    .item-amt{grid-column:1 / -1;text-align:left;}
+    .item-row .row-x{position:absolute;top:8px;right:8px;}
+    .invoice{padding:34px 24px;}
+    .invoice .doc-head{flex-direction:column;gap:20px;}
+    .invoice .parties{grid-template-columns:1fr;gap:22px;}
+    header h1{font-size:27px;}
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="creator-credit">
+    <span>Created by ☁️</span>
+    <span aria-hidden="true">→</span>
+    <a class="projects-btn" href="https://canva.link/3g93devirml6sk0" target="_blank" rel="noopener noreferrer">See more projects</a>
+  </div>
+  <h1>Free <span class="grad">UGC Invoice</span> Generator</h1>
+  <p>Fill in the details below, hit generate, and download a clean invoice as PDF or Word. Nothing is required — leave out anything you don't need.</p>
+</header>
+
+<div class="form-wrap">
+
+  <!-- CREATOR -->
+  <div class="card c-creator">
+    <div class="card-head">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+      <div><h2>Creator info</h2><div class="sub">Who the invoice is from — you</div></div>
+    </div>
+    <div class="grid">
+      <div class="field full"><label>Name / business</label><input id="cName" placeholder="Sky Kim · @yourhandle"></div>
+      <div class="field"><label>Email</label><input id="cEmail" type="email" placeholder="you@email.com"></div>
+      <div class="field"><label>Phone <span class="opt">· optional</span></label><input id="cPhone" placeholder="+61 ..."></div>
+      <div class="field"><label>ABN <span class="opt">· optional</span></label><input id="cAbn" placeholder="12 345 678 901"></div>
+      <div class="field"><label>Website / socials <span class="opt">· optional</span></label><input id="cWeb" placeholder="instagram.com/..."></div>
+      <div class="field full"><label>Address <span class="opt">· optional</span></label><textarea id="cAddr" placeholder="Street, suburb, state, postcode"></textarea></div>
+    </div>
+    <div class="remember-row">
+      <label class="switch"><input type="checkbox" id="rememberToggle"><span class="track"></span>Remember my details</label>
+      <span class="remember-sub">Saves your creator &amp; payment info on this browser so the form's ready next time. Turn off to keep nothing.</span>
+    </div>
+  </div>
+
+  <!-- BRAND -->
+  <div class="card c-brand">
+    <div class="card-head">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"/></svg></span>
+      <div><h2>Brand info</h2><div class="sub">Who you're billing</div></div>
+    </div>
+    <div class="grid">
+      <div class="field full"><label>Brand / company name</label><input id="bName" placeholder="Brand Pty Ltd"></div>
+      <div class="field"><label>Contact name <span class="opt">· optional</span></label><input id="bContact" placeholder="Attn: ..."></div>
+      <div class="field"><label>Email <span class="opt">· optional</span></label><input id="bEmail" type="email" placeholder="accounts@brand.com"></div>
+      <div class="field full"><label>Address <span class="opt">· optional</span></label><textarea id="bAddr" placeholder="Company address"></textarea></div>
+    </div>
+  </div>
+
+  <!-- INVOICE DETAILS -->
+  <div class="card c-inv">
+    <div class="card-head">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg></span>
+      <div><h2>Invoice details</h2><div class="sub">Number and dates</div></div>
+    </div>
+    <div class="grid">
+      <div class="field"><label>Invoice number</label><input id="invNo" placeholder="INV-001"></div>
+      <div class="field"><label>Date issued</label>
+        <div class="date-wrap">
+          <input id="dIssued" placeholder="25 Jun 2026" autocomplete="off">
+          <input type="date" class="date-native" id="dIssued_native" tabindex="-1" aria-hidden="true">
+          <button type="button" class="cal-btn" data-for="dIssued" title="Pick a date" aria-label="Pick date issued"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></button>
+        </div>
+      </div>
+      <div class="field"><label>Payment due</label>
+        <div class="date-wrap">
+          <input id="dDue" placeholder="09 Jul 2026" autocomplete="off">
+          <input type="date" class="date-native" id="dDue_native" tabindex="-1" aria-hidden="true">
+          <button type="button" class="cal-btn" data-for="dDue" title="Pick a date" aria-label="Pick payment due date"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M3 9h18M8 2v4M16 2v4"/></svg></button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ITEMS -->
+  <div class="card c-items">
+    <div class="card-head">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M3 12h18M3 18h12"/></svg></span>
+      <div><h2>Items</h2><div class="sub">Content, usage &amp; add-ons — totals add up automatically</div></div>
+    </div>
+
+    <div class="subsec">
+      <div class="subsec-head"><span class="sdot content"></span>Content</div>
+      <div class="items-head"><div>Description</div><div class="r">Qty</div><div class="r">Unit price</div><div class="r">Amount</div><div></div></div>
+      <div id="contentBody"></div>
+      <button class="add-item" id="addContent"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add content</button>
+
+      <div class="subsub">
+        <div class="subsub-head">Usage rights</div>
+        <div class="dur-chips">
+          <button type="button" class="dur-chip" data-dur="3 months">3 months</button>
+          <button type="button" class="dur-chip" data-dur="6 months">6 months</button>
+          <button type="button" class="dur-chip" data-dur="9 months">9 months</button>
+          <button type="button" class="dur-chip" data-dur="12 months">12 months</button>
+        </div>
+        <div class="usage-row2">
+          <input id="usageDesc" class="usage-desc" placeholder="or type your own usage terms">
+          <div class="pct-cell"><input id="usagePct" class="usage-pct" inputmode="decimal" placeholder="0"><span class="pct-suffix">% of content</span></div>
+          <div class="usage-amt" id="usageAmt">—</div>
+        </div>
+        <div class="usage-hint" id="usageHint">Worked out automatically from your content subtotal — pick a duration or type your own.</div>
+      </div>
+    </div>
+
+    <div class="subsec">
+      <div class="subsec-head"><span class="sdot addon"></span>Add-ons</div>
+      <div class="items-head"><div>Description</div><div class="r">Qty</div><div class="r">Unit price</div><div class="r">Amount</div><div></div></div>
+      <div id="addonBody"></div>
+      <button class="add-item" id="addAddon"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Add add-on</button>
+    </div>
+
+    <div class="options">
+      <label class="switch"><input type="checkbox" id="gstToggle"><span class="track"></span>Add GST (10%)</label>
+      <span class="cur-pick">Currency
+        <select id="currency">
+          <option value="AUD">AUD $</option><option value="USD">USD $</option>
+          <option value="EUR">EUR €</option><option value="GBP">GBP £</option>
+          <option value="NZD">NZD $</option><option value="CAD">CAD $</option>
+        </select>
+      </span>
+    </div>
+  </div>
+
+  <!-- PAYMENT -->
+  <div class="card c-pay">
+    <div class="card-head">
+      <span class="chip"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg></span>
+      <div><h2>Payment details</h2><div class="sub">How the brand pays you</div></div>
+    </div>
+    <div class="grid">
+      <div class="field full"><label>Bank / payment info <span class="opt">· optional</span></label><textarea id="payDetails" placeholder="Account name&#10;BSB · Account number&#10;PayID / PayPal"></textarea></div>
+      <div class="field full"><label>Notes / terms <span class="opt">· optional</span></label><textarea id="notes" placeholder="e.g. Payment due within 14 days. Usage rights granted on receipt of payment."></textarea></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="generate-bar">
+  <button class="generate-btn" id="generateBtn">
+    <svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+    Generate invoice
+  </button>
+  <div class="save-note" id="saveNote">Your creator &amp; payment details save in this browser for next time.</div>
+</div>
+
+<section id="output" class="is-hidden" aria-live="polite">
+  <div class="output-actions">
+    <span class="ttl">Your invoice <span class="live">· updates live as you edit above</span></span>
+    <button class="dl edit" id="editBtn">↑ Back to form</button>
+    <button class="dl pdf" id="pdfBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>Download PDF</button>
+    <button class="dl word" id="docxBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Download Word</button>
+  </div>
+  <div class="invoice" id="invoiceDoc"></div>
+</section>
+
+<script>
+(function(){
+  "use strict";
+  const $ = id => document.getElementById(id);
+  const STORE_KEY = "ugcInvoiceGen.v1";
+  const CUR = {AUD:"$",USD:"$",EUR:"€",GBP:"£",NZD:"$",CAD:"$"};
+
+  /* helpers */
+  const esc = s => String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+  const num = v => { const n=parseFloat(String(v).replace(/[^0-9.\-]/g,"")); return isFinite(n)?n:0; };
+  const fmtDate = d => d.toLocaleDateString("en-AU",{day:"2-digit",month:"short",year:"numeric"});
+  const toISO = d => { const z=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+z(d.getMonth()+1)+"-"+z(d.getDate()); };
+  const parseLoose = s => { if(!s||!s.trim()) return null; const d=new Date(s); return isNaN(d.getTime())?null:d; };
+  const parseISO = s => { const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(s||""); return m?new Date(+m[1],+m[2]-1,+m[3]):null; };
+  function money(n){ return CUR[$("currency").value] + n.toLocaleString("en-AU",{minimumFractionDigits:2,maximumFractionDigits:2}); }
+
+  /* ---------- items: content + usage + add-ons ---------- */
+  const contentBody = $("contentBody");
+  const addonBody = $("addonBody");
+  function makeRow(descPh){
+    const row=document.createElement("div");
+    row.className="item-row";
+    row.innerHTML=
+      '<div class="desc-cell"><input class="desc"></div>'+
+      '<input class="qty num" inputmode="decimal" placeholder="0">'+
+      '<input class="price num" inputmode="decimal" placeholder="0.00">'+
+      '<div class="item-amt">—</div>'+
+      '<button class="row-x" title="Remove" aria-label="Remove item">&times;</button>';
+    row.querySelector(".desc").setAttribute("placeholder",descPh||"");
+    row.querySelector(".row-x").addEventListener("click",()=>{ row.remove(); refreshAmounts(); liveRender(); });
+    return row;
+  }
+  function rowsToItems(bodyEl){
+    const out=[];
+    bodyEl.querySelectorAll(".item-row").forEach(r=>{
+      const desc=r.querySelector(".desc").value.trim();
+      const q=r.querySelector(".qty").value.trim();
+      const p=r.querySelector(".price").value.trim();
+      if(desc||q||p) out.push({desc,qty:num(q),price:num(p),amt:num(q)*num(p)});
+    });
+    return out;
+  }
+  function subtotalOf(bodyEl){
+    let s=0; bodyEl.querySelectorAll(".item-row").forEach(r=>{ s+=num(r.querySelector(".qty").value)*num(r.querySelector(".price").value); });
+    return s;
+  }
+  function refreshAmounts(){
+    [contentBody,addonBody].forEach(b=>b.querySelectorAll(".item-row").forEach(r=>{
+      const q=num(r.querySelector(".qty").value), p=num(r.querySelector(".price").value);
+      const any=r.querySelector(".qty").value!=="" || r.querySelector(".price").value!=="";
+      r.querySelector(".item-amt").textContent = any ? money(q*p) : "—";
+    }));
+    const contentSub=subtotalOf(contentBody);
+    const pct=num($("usagePct").value);
+    const usageAmt=contentSub*pct/100;
+    const show=pct>0 && usageAmt>0;
+    $("usageAmt").textContent = show ? money(usageAmt) : "—";
+    $("usageHint").textContent = show
+      ? pct+"% of "+money(contentSub)+" content = "+money(usageAmt)
+      : "Adds a usage fee worked out automatically from your content subtotal — no manual maths.";
+  }
+
+  /* ---------- gather data ---------- */
+  function gather(){
+    const content=rowsToItems(contentBody);
+    const addons=rowsToItems(addonBody);
+    const contentSub=content.reduce((s,i)=>s+i.amt,0);
+    const addonSub=addons.reduce((s,i)=>s+i.amt,0);
+    const pct=num($("usagePct").value);
+    const usageAmt=contentSub*pct/100;
+    const usage=(pct>0 && usageAmt>0)?{desc:($("usageDesc").value.trim()||"Usage rights"),pct,amt:usageAmt}:null;
+    const subtotal=contentSub+addonSub+(usage?usage.amt:0);
+    const gstOn=$("gstToggle").checked;
+    const gst=gstOn?subtotal*0.10:0;
+    return {
+      creator:{name:$("cName").value.trim(),lines:[ $("cEmail").value, $("cPhone").value, $("cAbn").value?("ABN "+$("cAbn").value):"", $("cWeb").value, $("cAddr").value ].map(x=>x&&x.trim()).filter(Boolean)},
+      brand:{name:$("bName").value.trim(),lines:[ $("bContact").value, $("bEmail").value, $("bAddr").value ].map(x=>x&&x.trim()).filter(Boolean)},
+      invNo:$("invNo").value.trim(), issued:$("dIssued").value.trim(), due:$("dDue").value.trim(),
+      content, addons, usage, contentSub, addonSub,
+      subtotal, gstOn, gst, total:subtotal+gst,
+      pay:$("payDetails").value.trim(), notes:$("notes").value.trim(),
+      cur:$("currency").value
+    };
+  }
+
+  /* ---------- render the on-screen invoice ---------- */
+  function renderInvoice(d){
+    const metaRows=[
+      ["Invoice no.",d.invNo],["Date issued",d.issued],["Payment due",d.due]
+    ].filter(r=>r[1]).map(r=>`<div class="k">${esc(r[0])}</div><div class="v">${esc(r[1])}</div>`).join("");
+
+    const creatorBlock=`<div><div class="eyebrow">From</div>
+      ${d.creator.name?`<div class="pname">${esc(d.creator.name)}</div>`:""}
+      ${d.creator.lines.length?`<div class="pdetails">${esc(d.creator.lines.join("\n"))}</div>`:""}</div>`;
+    const brandBlock=`<div><div class="eyebrow">Billed to</div>
+      ${d.brand.name?`<div class="pname">${esc(d.brand.name)}</div>`:""}
+      ${d.brand.lines.length?`<div class="pdetails">${esc(d.brand.lines.join("\n"))}</div>`:""}</div>`;
+
+    const groups=[];
+    const contentRows=d.content.map(it=>({desc:it.desc,qty:it.qty,price:it.price,amt:it.amt}));
+    if(d.usage) contentRows.push({desc:d.usage.desc+" ("+d.usage.pct+"% of content)",qty:0,price:0,amt:d.usage.amt});
+    if(contentRows.length) groups.push({label:"Content",rows:contentRows});
+    if(d.addons.length) groups.push({label:"Add-ons",rows:d.addons.map(it=>({desc:it.desc,qty:it.qty,price:it.price,amt:it.amt}))});
+    const showHeaders = groups.length>1;
+
+    let rows="";
+    if(!groups.length){
+      rows=`<tr><td style="color:#9aa1ac">No items added</td><td class="r"></td><td class="r"></td><td class="r amt">${esc(money(0))}</td></tr>`;
+    } else {
+      groups.forEach(g=>{
+        if(showHeaders) rows+=`<tr class="grp"><td colspan="4">${esc(g.label)}</td></tr>`;
+        g.rows.forEach(it=>{
+          rows+=`<tr>
+            <td>${esc(it.desc)}</td>
+            <td class="r">${it.qty?esc(String(it.qty)):""}</td>
+            <td class="r">${it.price?esc(money(it.price)):""}</td>
+            <td class="r amt">${esc(money(it.amt))}</td></tr>`;
+        });
+      });
+    }
+
+    const totals=[`<div class="trow"><span class="lbl">Subtotal</span><span class="val">${esc(money(d.subtotal))}</span></div>`];
+    if(d.gstOn) totals.push(`<div class="trow"><span class="lbl">GST (10%)</span><span class="val">${esc(money(d.gst))}</span></div>`);
+    totals.push(`<div class="trow grand"><span class="lbl">Total (${esc(d.cur)})</span><span class="val">${esc(money(d.total))}</span></div>`);
+
+    const payBlock = d.pay ? `<div class="pay-block"><div class="eyebrow">Payment details</div><div class="pdetails">${esc(d.pay)}</div></div>` : "";
+    const notesBlock = d.notes ? `<div class="${d.pay?'notes-block':'pay-block'}"><div class="eyebrow">Notes</div><div class="pdetails">${esc(d.notes)}</div></div>` : "";
+
+    $("invoiceDoc").innerHTML=`
+      <div class="doc-head">
+        <div class="doc-title">Invoice</div>
+        ${metaRows?`<div class="meta">${metaRows}</div>`:""}
+      </div>
+      <div class="parties">${creatorBlock}${brandBlock}</div>
+      <table>
+        <thead><tr><th>Description</th><th class="r">Qty</th><th class="r">Unit price</th><th class="r">Amount</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+      <div class="totals"><div class="totals-inner">${totals.join("")}</div></div>
+      ${payBlock}${notesBlock}`;
+  }
+
+  /* ---------- persistence (creator + payment, reusable) ---------- */
+  let saveTimer=null;
+  const rememberOn=()=>$("rememberToggle").checked;
+  function updateRememberHint(){
+    $("saveNote").textContent = rememberOn()
+      ? "Your creator & payment details are saved on this browser for next time."
+      : "Nothing is saved — your details are cleared when you leave.";
+  }
+  function persist(){
+    // Always remember the toggle preference itself.
+    if(!rememberOn()){
+      try{localStorage.setItem(STORE_KEY,JSON.stringify({remember:false}));}catch(e){}
+      return;
+    }
+    const data={remember:true,
+      cName:$("cName").value,cEmail:$("cEmail").value,cPhone:$("cPhone").value,cAbn:$("cAbn").value,
+      cWeb:$("cWeb").value,cAddr:$("cAddr").value,payDetails:$("payDetails").value,notes:$("notes").value,
+      gst:$("gstToggle").checked,currency:$("currency").value,lastInvNo:$("invNo").value};
+    try{localStorage.setItem(STORE_KEY,JSON.stringify(data));}catch(e){}
+  }
+  const schedulePersist=()=>{clearTimeout(saveTimer);saveTimer=setTimeout(persist,500);};
+
+  function nextInvNo(last){
+    if(!last) return "INV-001";
+    const m=String(last).match(/^(.*?)(\d+)(\D*)$/);
+    if(!m) return last;
+    return m[1]+String(parseInt(m[2],10)+1).padStart(m[2].length,"0")+m[3];
+  }
+  function loadSaved(){
+    let d={}; try{d=JSON.parse(localStorage.getItem(STORE_KEY)||"{}");}catch(e){}
+    const remember = d.remember!==false; // default on
+    $("rememberToggle").checked = remember;
+    if(remember){
+      const set=(id,v)=>{ if(v) $(id).value=v; };
+      set("cName",d.cName);set("cEmail",d.cEmail);set("cPhone",d.cPhone);set("cAbn",d.cAbn);
+      set("cWeb",d.cWeb);set("cAddr",d.cAddr);set("payDetails",d.payDetails);set("notes",d.notes);
+      if(d.currency)$("currency").value=d.currency;
+      $("gstToggle").checked=!!d.gst;
+      $("invNo").value=nextInvNo(d.lastInvNo);
+    } else {
+      $("invNo").value="INV-001";
+    }
+    const t=new Date(),due=new Date();due.setDate(due.getDate()+14);
+    $("dIssued").value=fmtDate(t);$("dDue").value=fmtDate(due);
+    updateRememberHint();
+  }
+
+  /* ---------- live + generate ---------- */
+  let generated=false;
+  function liveRender(){ if(generated) renderInvoice(gather()); }
+
+  $("generateBtn").addEventListener("click",()=>{
+    renderInvoice(gather());
+    generated=true;
+    persist();
+    $("output").classList.remove("is-hidden");
+    $("output").scrollIntoView({behavior:"smooth",block:"start"});
+  });
+
+  document.addEventListener("input",e=>{
+    const t=e.target;
+    if(t.closest(".c-items")) refreshAmounts();
+    if(t.id==="usageDesc") syncChips();
+    if(["cName","cEmail","cPhone","cAbn","cWeb","cAddr","payDetails","notes","invNo"].includes(t.id)) schedulePersist();
+    liveRender();
+  });
+  $("gstToggle").addEventListener("change",()=>{refreshAmounts();persist();liveRender();});
+  $("currency").addEventListener("change",()=>{refreshAmounts();persist();liveRender();});
+  $("rememberToggle").addEventListener("change",()=>{persist();updateRememberHint();});
+  $("addContent").addEventListener("click",()=>contentBody.appendChild(makeRow("e.g. UGC video (30s)")));
+  $("addAddon").addEventListener("click",()=>addonBody.appendChild(makeRow("e.g. 3 story set")));
+
+  /* duration chips fill the usage field; typing custom clears the active chip */
+  const presetFill = dur => "Usage rights — " + dur;
+  function syncChips(){
+    const v=$("usageDesc").value.trim();
+    document.querySelectorAll(".dur-chip").forEach(c=>c.classList.toggle("active", v===presetFill(c.dataset.dur)));
+  }
+  document.querySelectorAll(".dur-chip").forEach(chip=>{
+    chip.addEventListener("click",()=>{
+      const fill=presetFill(chip.dataset.dur);
+      $("usageDesc").value = ($("usageDesc").value.trim()===fill) ? "" : fill;
+      syncChips(); refreshAmounts(); liveRender();
+    });
+  });
+  $("editBtn").addEventListener("click",()=>window.scrollTo({top:0,behavior:"smooth"}));
+
+  /* ---------- date pickers (type freely, or click to pick) ---------- */
+  document.querySelectorAll(".cal-btn").forEach(btn=>{
+    const id=btn.getAttribute("data-for");
+    const text=$(id), native=$(id+"_native");
+    btn.addEventListener("click",()=>{
+      native.value = toISO(parseLoose(text.value) || new Date());
+      if(typeof native.showPicker==="function"){ try{ native.showPicker(); return; }catch(e){} }
+      native.focus(); native.click();
+    });
+    native.addEventListener("change",()=>{
+      const d=parseISO(native.value);
+      if(d){ text.value=fmtDate(d); text.dispatchEvent(new Event("input",{bubbles:true})); }
+    });
+  });
+
+  /* ---------- downloads (fully local: no export library or network needed) ---------- */
+  const fileBase=d=>"Invoice_"+(d.invNo||"draft").replace(/[^\w\-]+/g,"-");
+  function downloadBlob(blob,name){
+    const url=URL.createObjectURL(blob),a=document.createElement("a");
+    a.href=url;a.download=name;a.style.display="none";
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),60000);
+  }
+  function runDownload(btn,work){
+    const old=btn.innerHTML;
+    btn.disabled=true;btn.textContent="Preparing…";
+    try{ work(); btn.textContent="Downloaded"; }
+    catch(err){ console.error(err); alert("Couldn't create the file: "+err.message); }
+    setTimeout(()=>{btn.disabled=false;btn.innerHTML=old;},1200);
+  }
+
+  /* PDF: a compact vector/text PDF that downloads directly instead of opening Print. */
+  const pdfSafe=s=>String(s==null?"":s).replace(/[\u2010-\u2015]/g,"-").replace(/\u2022/g,"-").replace(/[\u2018\u2019]/g,"'").replace(/[\u201c\u201d]/g,'"');
+  function pdfLiteral(s){
+    const mapped=pdfSafe(s).replace(/€/g,"\u0080").replace(/£/g,"\u00a3");
+    return mapped.replace(/([\\()])/g,"\\$1").replace(/\r?\n/g," ");
+  }
+  function binaryBytes(s){const a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i)&255;return a;}
+  function wrapText(s,max){
+    const words=pdfSafe(s).split(/\s+/).filter(Boolean),out=[];let line="";
+    words.forEach(w=>{const n=line?line+" "+w:w;if(n.length>max&&line){out.push(line);line=w;}else line=n;});
+    if(line||!out.length)out.push(line);return out;
+  }
+  function buildPdf(){
+    const d=gather(),pages=[];let cmds=[],y=0;
+    const text=(x,yy,size,s,bold=false)=>cmds.push(`BT /${bold?"F2":"F1"} ${size} Tf 1 0 0 1 ${x} ${yy} Tm (${pdfLiteral(s)}) Tj ET`);
+    const right=(xr,yy,size,s,bold=false)=>text(Math.max(50,xr-pdfSafe(s).length*size*.52),yy,size,s,bold);
+    const line=(x1,yy1,x2,yy2,w=.6,color="0.85 G")=>cmds.push(`${color} ${w} w ${x1} ${yy1} m ${x2} ${yy2} l S`);
+    const newPage=continued=>{if(cmds.length)pages.push(cmds.join("\n"));cmds=[];y=790;text(55,y,continued?22:32,continued?"INVOICE (continued)":"INVOICE",true);y-=42;};
+    const need=h=>{if(y-h<55)newPage(true);};
+    newPage(false);
+    [["Invoice no.",d.invNo],["Date issued",d.issued],["Payment due",d.due]].filter(v=>v[1]).forEach((v,i)=>{text(365,790-i*18,8,v[0].toUpperCase(),true);text(455,790-i*18,10,v[1]);});
+    y=700;
+    text(55,y,8,"FROM",true);text(315,y,8,"BILLED TO",true);y-=20;
+    if(d.creator.name)text(55,y,12,d.creator.name,true);if(d.brand.name)text(315,y,12,d.brand.name,true);
+    const from=d.creator.lines.flatMap(v=>String(v).split(/\r?\n/)),to=d.brand.lines.flatMap(v=>String(v).split(/\r?\n/));
+    const partyLines=Math.max(from.length,to.length,1);for(let i=0;i<partyLines;i++){if(from[i])text(55,y-17-i*14,9,from[i]);if(to[i])text(315,y-17-i*14,9,to[i]);}
+    y-=partyLines*14+54;
+    const tableHead=()=>{text(55,y,8,"DESCRIPTION",true);right(385,y,8,"QTY",true);right(470,y,8,"UNIT PRICE",true);right(540,y,8,"AMOUNT",true);line(55,y-8,540,y-8,1,"0 G");y-=26;};
+    tableHead();
+    const groups=[],content=d.content.slice();if(d.usage)content.push({desc:d.usage.desc+" ("+d.usage.pct+"% of content)",qty:0,price:0,amt:d.usage.amt});
+    if(content.length)groups.push({label:"Content",rows:content});if(d.addons.length)groups.push({label:"Add-ons",rows:d.addons});
+    if(!groups.length){text(55,y,9,"No items added");right(540,y,9,money(0),true);y-=25;}
+    groups.forEach((g,gi)=>{
+      if(groups.length>1){need(30);text(55,y,8,g.label.toUpperCase(),true);y-=18;}
+      g.rows.forEach(it=>{const lines=wrapText(it.desc||"",48);need(lines.length*13+16);if(y>760)tableHead();lines.forEach((v,i)=>text(55,y-i*13,9,v));if(it.qty)right(385,y,9,String(it.qty));if(it.price)right(470,y,9,money(it.price));right(540,y,9,money(it.amt),true);y-=lines.length*13+10;line(55,y+5,540,y+5,.4);});
+    });
+    need(105);y-=12;right(455,y,9,"Subtotal");right(540,y,9,money(d.subtotal),true);y-=20;
+    if(d.gstOn){right(455,y,9,"GST (10%)");right(540,y,9,money(d.gst),true);y-=20;}
+    line(350,y+8,540,y+8,1,"0 G");right(455,y-8,12,"Total ("+d.cur+")",true);right(540,y-8,12,money(d.total),true);y-=42;
+    const block=(title,value)=>{if(!value)return;const lines=String(value).split(/\r?\n/).flatMap(v=>wrapText(v,85));need(30+lines.length*14);line(55,y,540,y,.5);y-=20;text(55,y,8,title,true);y-=18;lines.forEach(v=>{text(55,y,9,v);y-=14;});y-=8;};
+    block("PAYMENT DETAILS",d.pay);block("NOTES",d.notes);pages.push(cmds.join("\n"));
+    const objs=[];objs[1]="<< /Type /Catalog /Pages 2 0 R >>";objs[3]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";objs[4]="<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
+    const kids=[];pages.forEach((p,i)=>{const pid=5+i*2,cid=pid+1;kids.push(pid+" 0 R");objs[pid]=`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${cid} 0 R >>`;objs[cid]=`<< /Length ${binaryBytes(p).length} >>\nstream\n${p}\nendstream`;});
+    objs[2]=`<< /Type /Pages /Kids [${kids.join(" ")}] /Count ${pages.length} >>`;
+    let pdf="%PDF-1.4\n%\xE2\xE3\xCF\xD3\n",offsets=[0];for(let i=1;i<objs.length;i++){offsets[i]=binaryBytes(pdf).length;pdf+=`${i} 0 obj\n${objs[i]}\nendobj\n`;}
+    const xref=binaryBytes(pdf).length;pdf+=`xref\n0 ${objs.length}\n0000000000 65535 f \n`;for(let i=1;i<objs.length;i++)pdf+=String(offsets[i]).padStart(10,"0")+" 00000 n \n";pdf+=`trailer\n<< /Size ${objs.length} /Root 1 0 R >>\nstartxref\n${xref}\n%%EOF`;
+    downloadBlob(new Blob([binaryBytes(pdf)],{type:"application/pdf"}),fileBase(d)+".pdf");
+  }
+
+  /* DOCX: create a standards-based Open XML document and package it as a ZIP. */
+  const xesc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&apos;"}[c]));
+  const u16=n=>new Uint8Array([n&255,(n>>>8)&255]);
+  const u32=n=>new Uint8Array([n&255,(n>>>8)&255,(n>>>16)&255,(n>>>24)&255]);
+  function joinBytes(parts){let n=0;parts.forEach(p=>n+=p.length);const out=new Uint8Array(n);let o=0;parts.forEach(p=>{out.set(p,o);o+=p.length;});return out;}
+  const crcTable=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=(c&1)?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0;}return t;})();
+  function crc32(a){let c=0xFFFFFFFF;for(let i=0;i<a.length;i++)c=crcTable[(c^a[i])&255]^(c>>>8);return (c^0xFFFFFFFF)>>>0;}
+  function zipStore(files){
+    const enc=new TextEncoder(),locals=[],centrals=[];let offset=0;
+    Object.keys(files).forEach(name=>{const nb=enc.encode(name),data=enc.encode(files[name]),crc=crc32(data),flags=0x0800;
+      const local=joinBytes([u32(0x04034b50),u16(20),u16(flags),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(nb.length),u16(0),nb,data]);locals.push(local);
+      const central=joinBytes([u32(0x02014b50),u16(20),u16(20),u16(flags),u16(0),u16(0),u16(0),u32(crc),u32(data.length),u32(data.length),u16(nb.length),u16(0),u16(0),u16(0),u16(0),u32(0),u32(offset),nb]);centrals.push(central);offset+=local.length;});
+    const centralData=joinBytes(centrals),end=joinBytes([u32(0x06054b50),u16(0),u16(0),u16(centrals.length),u16(centrals.length),u32(centralData.length),u32(offset),u16(0)]);return joinBytes([...locals,centralData,end]);
+  }
+  function buildDocx(){
+    const d=gather(),p=(s,b=false,size=20,color="16181D",align="left")=>`<w:p><w:pPr><w:jc w:val="${align}"/><w:spacing w:after="40"/></w:pPr><w:r><w:rPr>${b?"<w:b/>":""}<w:color w:val="${color}"/><w:sz w:val="${size}"/></w:rPr><w:t xml:space="preserve">${xesc(s)}</w:t></w:r></w:p>`;
+    const cell=(body,width,shade="")=>`<w:tc><w:tcPr><w:tcW w:w="${width}" w:type="dxa"/>${shade?`<w:shd w:fill="${shade}"/>`:""}<w:tcMar><w:top w:w="80" w:type="dxa"/><w:left w:w="100" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="100" w:type="dxa"/></w:tcMar></w:tcPr>${body}</w:tc>`;
+    const row=cells=>`<w:tr>${cells.join("")}</w:tr>`,table=rows=>`<w:tbl><w:tblPr><w:tblW w:w="0" w:type="auto"/><w:tblBorders><w:bottom w:val="single" w:sz="2" w:color="E6E8EC"/><w:insideH w:val="single" w:sz="2" w:color="E6E8EC"/></w:tblBorders></w:tblPr><w:tblGrid><w:gridCol w:w="5000"/><w:gridCol w:w="1100"/><w:gridCol w:w="1650"/><w:gridCol w:w="1650"/></w:tblGrid>${rows.join("")}</w:tbl>`;
+    let body=p("INVOICE",true,52);[["Invoice no.",d.invNo],["Date issued",d.issued],["Payment due",d.due]].filter(v=>v[1]).forEach(v=>body+=p(v[0].toUpperCase()+"   "+v[1],false,18,"6B7280","right"));
+    body+=p("")+row([cell(p("FROM",true,16,"6B7280")+(d.creator.name?p(d.creator.name,true,24):"")+d.creator.lines.map(v=>p(v,false,19,"3A3F49")).join(""),4700),cell(p("BILLED TO",true,16,"6B7280")+(d.brand.name?p(d.brand.name,true,24):"")+d.brand.lines.map(v=>p(v,false,19,"3A3F49")).join(""),4700)]).replace("<w:tr>","<w:tbl><w:tblPr><w:tblBorders><w:top w:val=\"nil\"/><w:left w:val=\"nil\"/><w:bottom w:val=\"nil\"/><w:right w:val=\"nil\"/><w:insideH w:val=\"nil\"/><w:insideV w:val=\"nil\"/></w:tblBorders></w:tblPr><w:tr>").replace("</w:tr>","</w:tr></w:tbl>");
+    const rows=[row([cell(p("DESCRIPTION",true,16,"6B7280"),5000,"F3F4F6"),cell(p("QTY",true,16,"6B7280","right"),1100,"F3F4F6"),cell(p("UNIT PRICE",true,16,"6B7280","right"),1650,"F3F4F6"),cell(p("AMOUNT",true,16,"6B7280","right"),1650,"F3F4F6")])];
+    const groups=[],content=d.content.slice();if(d.usage)content.push({desc:d.usage.desc+" ("+d.usage.pct+"% of content)",qty:0,price:0,amt:d.usage.amt});if(content.length)groups.push({label:"Content",rows:content});if(d.addons.length)groups.push({label:"Add-ons",rows:d.addons});
+    if(!groups.length)rows.push(row([cell(p("No items added",false,19,"9AA0B8"),5000),cell(p("",false,19,"16181D","right"),1100),cell(p("",false,19,"16181D","right"),1650),cell(p(money(0),true,19,"16181D","right"),1650)]));
+    groups.forEach(g=>{
+      if(groups.length>1){
+        const groupCell=cell(p(g.label.toUpperCase(),true,16,"6B7280"),9400,"FAFAFB").replace("<w:tcPr>",'<w:tcPr><w:gridSpan w:val="4"/>');
+        rows.push(`<w:tr>${groupCell}</w:tr>`);
+      }
+      g.rows.forEach(it=>rows.push(row([
+        cell(p(it.desc||"",false,19),5000),
+        cell(p(it.qty?String(it.qty):"",false,19,"16181D","right"),1100),
+        cell(p(it.price?money(it.price):"",false,19,"16181D","right"),1650),
+        cell(p(money(it.amt),true,19,"16181D","right"),1650)
+      ])));
+    });
+    body+=p("")+table(rows)+p("")+p("Subtotal   "+money(d.subtotal),false,20,"6B7280","right");if(d.gstOn)body+=p("GST (10%)   "+money(d.gst),false,20,"6B7280","right");body+=p("Total ("+d.cur+")   "+money(d.total),true,26,"16181D","right");
+    const block=(title,value)=>{if(value)body+=p("")+p(title,true,16,"6B7280")+String(value).split(/\r?\n/).map(v=>p(v,false,20)).join("");};block("PAYMENT DETAILS",d.pay);block("NOTES",d.notes);
+    const document=`<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:body>${body}<w:sectPr><w:pgSz w:w="11906" w:h="16838"/><w:pgMar w:top="900" w:right="1000" w:bottom="900" w:left="1000" w:header="400" w:footer="400" w:gutter="0"/></w:sectPr></w:body></w:document>`;
+    const files={
+      "[Content_Types].xml":`<?xml version="1.0" encoding="UTF-8"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/><Override PartName="/word/styles.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml"/><Override PartName="/docProps/core.xml" ContentType="application/vnd.openxmlformats-package.core-properties+xml"/><Override PartName="/docProps/app.xml" ContentType="application/vnd.openxmlformats-officedocument.extended-properties+xml"/></Types>`,
+      "_rels/.rels":`<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/><Relationship Id="rId2" Type="http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties" Target="docProps/core.xml"/><Relationship Id="rId3" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties" Target="docProps/app.xml"/></Relationships>`,
+      "word/document.xml":document,
+      "word/_rels/document.xml.rels":`<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles" Target="styles.xml"/></Relationships>`,
+      "word/styles.xml":`<?xml version="1.0" encoding="UTF-8"?><w:styles xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii="Calibri" w:hAnsi="Calibri"/><w:sz w:val="20"/></w:rPr></w:rPrDefault></w:docDefaults><w:style w:type="paragraph" w:default="1" w:styleId="Normal"><w:name w:val="Normal"/></w:style></w:styles>`,
+      "docProps/core.xml":`<?xml version="1.0" encoding="UTF-8"?><cp:coreProperties xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" xmlns:dc="http://purl.org/dc/elements/1.1/"><dc:title>${xesc(d.invNo||"Invoice")}</dc:title><dc:creator>${xesc(d.creator.name||"UGC Invoice Generator")}</dc:creator></cp:coreProperties>`,
+      "docProps/app.xml":`<?xml version="1.0" encoding="UTF-8"?><Properties xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties"><Application>UGC Invoice Generator</Application></Properties>`};
+    downloadBlob(new Blob([zipStore(files)],{type:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"}),fileBase(d)+".docx");
+  }
+  $("pdfBtn").addEventListener("click",()=>{renderInvoice(gather());persist();runDownload($("pdfBtn"),buildPdf);});
+  $("docxBtn").addEventListener("click",()=>{renderInvoice(gather());persist();runDownload($("docxBtn"),buildDocx);});
+
+  /* ---------- init ---------- */
+  loadSaved();
+  contentBody.appendChild(makeRow("e.g. UGC video (30s)"));
+  addonBody.appendChild(makeRow("e.g. 3 story set"));
+  syncChips();
+  refreshAmounts();
+})();
+</script>
+</body>
+</html>

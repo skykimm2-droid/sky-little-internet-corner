@@ -231,6 +231,7 @@
     }
     .note .portal-link:hover { filter: brightness(1.08) saturate(1.05); transform: rotate(-.7deg) translateY(-2px); }
     .note .portal-link:focus-visible { outline: 3px solid #fff1bd; outline-offset: 4px; filter: brightness(1.08); }
+    .note .app-panel { width: min(100%, 17rem); }
     .note button {
       min-height: 44px;
       padding: .4rem .35rem;
@@ -308,13 +309,25 @@
     </div>
   </dialog>
 
-  <dialog id="comingSoon" aria-labelledby="soonTitle" aria-describedby="soonDescription">
+  <dialog id="comingSoon" aria-labelledby="soonTitle">
     <div class="note">
       <span class="keyhole" aria-hidden="true">⌘</span>
       <h2 id="soonTitle">A little workshop is waking up.</h2>
-      <p id="soonDescription">Apps &amp; software projects are coming soon.</p>
       <div class="actions">
+        <a class="portal-link app-panel" href="ugc-invoice-generator/" target="_blank" rel="noopener noreferrer">Free UGC Invoice Generator</a>
+        <button class="portal-link app-panel" id="futureAppPanel" type="button" aria-label="Discover the next app">?</button>
         <button id="closeSoon" type="button">Back to the garden</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="futureAppDialog" aria-labelledby="futureAppTitle" aria-describedby="futureAppDescription">
+    <div class="note">
+      <span class="keyhole" aria-hidden="true">✦</span>
+      <h2 id="futureAppTitle">The next little idea</h2>
+      <p id="futureAppDescription">A reimagined productivity app to help you actually reach your goals.</p>
+      <div class="actions">
+        <button id="closeFutureApp" type="button">Back to the garden</button>
       </div>
     </div>
   </dialog>
@@ -328,6 +341,9 @@
       const modelingHotspot = document.getElementById('modelingHotspot');
       const socialHotspot = document.getElementById('socialHotspot');
       const appsHotspot = document.getElementById('appsHotspot');
+      const futureAppPanel = document.getElementById('futureAppPanel');
+      const futureAppDialog = document.getElementById('futureAppDialog');
+      const closeFutureApp = document.getElementById('closeFutureApp');
       const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
       let dragging = false;
       let startX = 0;
@@ -400,6 +416,16 @@
       setupDialog(modelingHotspot, 'modelingDialog', 'closeModeling');
       setupDialog(socialHotspot, 'socialDialog', 'closeSocial');
       setupDialog(appsHotspot, 'comingSoon', 'closeSoon');
+
+      futureAppPanel.addEventListener('click', () => {
+        document.getElementById('comingSoon').close();
+        requestAnimationFrame(() => futureAppDialog.showModal());
+      });
+      closeFutureApp.addEventListener('click', () => futureAppDialog.close());
+      futureAppDialog.addEventListener('click', (event) => {
+        if (event.target === futureAppDialog) futureAppDialog.close();
+      });
+      futureAppDialog.addEventListener('close', () => appsHotspot.focus({ preventScroll: true }));
     })();
   </script>
 </body>
