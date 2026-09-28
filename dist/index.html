@@ -87,13 +87,31 @@
 
     .world.ready .hotspot { opacity: 1; transform: none; }
     .hotspot::after {
-      content: '';
-      width: clamp(8px, 2.4vw, 13px);
-      aspect-ratio: 1;
-      border-radius: 50%;
-      background: var(--gold);
-      box-shadow: 0 0 0 5px rgba(242,203,114,.18), 0 0 18px 7px rgba(242,203,114,.44);
-      transition: transform .2s ease, box-shadow .2s ease;
+      content: '☞';
+      position: absolute;
+      left: -1.25rem;
+      top: 54%;
+      color: #fff;
+      font-family: Georgia, 'Times New Roman', serif;
+      font-size: clamp(1.8rem, 5.6vw, 2.35rem);
+      line-height: 1;
+      pointer-events: none;
+      text-shadow:
+        0 2px 2px rgba(0,0,0,.92),
+        0 0 4px rgba(0,0,0,.9),
+        0 0 10px rgba(236,246,255,.72);
+      filter: drop-shadow(0 2px 1px rgba(0,0,0,.7));
+      animation: hand-float 2.2s ease-in-out infinite;
+      transition: color .2s ease, filter .2s ease, text-shadow .2s ease;
+    }
+
+    .modeling::after { top: 58%; }
+    .social::after { top: 52%; }
+    .apps::after { top: 55%; }
+
+    @keyframes hand-float {
+      0%, 100% { transform: translateY(-50%); }
+      50% { transform: translateY(calc(-50% - 5px)); }
     }
 
     .hotspot:hover,
@@ -104,7 +122,12 @@
       box-shadow: 0 0 22px rgba(246,207,114,.22), inset 0 0 12px rgba(0,0,0,.12);
     }
     .hotspot:hover::after,
-    .hotspot:focus-visible::after { transform: scale(1.2); box-shadow: 0 0 0 7px rgba(242,203,114,.18), 0 0 24px 10px rgba(242,203,114,.6); }
+    .hotspot:focus-visible::after {
+      color: #fff7d6;
+      filter: drop-shadow(0 2px 1px rgba(0,0,0,.78)) brightness(1.18);
+      text-shadow: 0 2px 2px rgba(0,0,0,.95), 0 0 6px rgba(0,0,0,.9), 0 0 15px rgba(255,245,207,.9);
+    }
+    .hotspot:active::after { color: #fff1bd; filter: brightness(1.2); }
 
     .modeling { left: 18%; top: 25%; width: 23%; height: 10%; }
     .social { left: 72%; top: 17%; width: 23%; height: 10%; }
@@ -253,6 +276,7 @@
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: .01ms !important; }
       .scene { transform: none; }
+      .hotspot::after { transform: translateY(-50%); }
     }
     @media (max-width: 500px) {
       .welcome { padding-inline: 1rem; }
