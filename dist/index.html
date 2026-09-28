@@ -199,12 +199,55 @@
     .note .keyhole { display: block; margin: 0 auto .8rem; color: var(--gold); font-size: 2.2rem; }
     .note h2 { margin: 0 0 .55rem; font-size: 1.55rem; font-weight: 400; }
     .note p { margin: 0 0 1.25rem; font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.55; color: #dce4da; }
-    .note .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; }
-    .note button,
-    .note .portal-link { min-height: 46px; padding: .65rem 1.2rem; border: 1px solid rgba(247,210,124,.58); border-radius: 999px; background: rgba(247,210,124,.1); color: #f6efdc; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
-    .note .portal-link { background: rgba(247,210,124,.2); }
-    .note button:focus-visible,
-    .note .portal-link:focus-visible { outline: 2px solid #fff1bd; outline-offset: 3px; }
+    .note .actions { display: flex; flex-direction: column; align-items: center; gap: .8rem; }
+    .note .portal-link {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 52px;
+      max-width: 17rem;
+      padding: .78rem 1.45rem;
+      border: 2px solid #6b3d1f;
+      color: #28180f;
+      background:
+        repeating-linear-gradient(6deg, rgba(84,45,21,.09) 0 1px, transparent 1px 6px),
+        linear-gradient(100deg, rgba(255,239,184,.4), transparent 28%, rgba(112,66,27,.12) 61%, transparent 85%),
+        #d6a95e;
+      box-shadow:
+        inset 0 0 0 2px rgba(255,232,169,.28),
+        inset 0 -7px 12px rgba(91,45,18,.13),
+        0 5px 0 #482913,
+        0 10px 20px rgba(0,0,0,.32);
+      clip-path: polygon(2% 7%, 97% 0, 100% 88%, 96% 100%, 3% 94%, 0 14%);
+      font-weight: 700;
+      line-height: 1.18;
+      text-align: center;
+      text-decoration: none;
+      text-shadow: 0 1px rgba(255,237,184,.42);
+      transform: rotate(-.7deg);
+      cursor: pointer;
+      transition: filter .18s ease, transform .18s ease, box-shadow .18s ease;
+    }
+    .note .portal-link:hover { filter: brightness(1.08) saturate(1.05); transform: rotate(-.7deg) translateY(-2px); }
+    .note .portal-link:focus-visible { outline: 3px solid #fff1bd; outline-offset: 4px; filter: brightness(1.08); }
+    .note button {
+      min-height: 44px;
+      padding: .4rem .35rem;
+      border: 0;
+      border-radius: 0;
+      color: #e8d8b0;
+      background: transparent;
+      box-shadow: none;
+      cursor: pointer;
+      text-decoration: underline;
+      text-decoration-color: rgba(232,216,176,.42);
+      text-decoration-thickness: 1px;
+      text-underline-offset: .3rem;
+      transition: color .18s ease, text-decoration-color .18s ease;
+    }
+    .note button:hover { color: #fff1bd; text-decoration-color: currentColor; }
+    .note button:focus-visible { outline: 2px solid #fff1bd; outline-offset: 3px; color: #fff1bd; }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: .01ms !important; }
