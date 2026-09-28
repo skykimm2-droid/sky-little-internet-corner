@@ -25,6 +25,7 @@
     .world {
       position: fixed;
       inset: 0;
+      z-index: 0;
       display: grid;
       place-items: center;
       overflow: hidden;
@@ -43,14 +44,64 @@
       opacity: .72;
     }
 
+    .tunnel-stage {
+      position: fixed;
+      inset: 0;
+      z-index: 10;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      opacity: 1;
+      background: #03090c;
+      transition: opacity .5s ease;
+    }
+
+    .tunnel-stage::before {
+      content: '';
+      position: absolute;
+      inset: -4%;
+      background: url('assets/mossy-rabbit-hole.png') 50% 61% / cover no-repeat;
+      filter: blur(26px) brightness(.28) saturate(.72);
+      transform: scale(1.1);
+    }
+
+    .tunnel-frame {
+      position: relative;
+      width: min(100vw, 56.28dvh);
+      height: min(177.68vw, 100dvh);
+      filter: drop-shadow(0 0 48px rgba(0,0,0,.72));
+    }
+
+    .tunnel-image {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: fill;
+      transform-origin: 50% 62%;
+      transform: translate3d(0,0,0) scale(1);
+      filter: brightness(.94) saturate(.96);
+      transition:
+        transform 1.9s cubic-bezier(.28,.02,.22,1),
+        filter 1.9s ease;
+      will-change: transform, filter;
+    }
+
+    .tunnel-stage.descending .tunnel-image {
+      transform: translate3d(0,-1%,0) scale(2.65);
+      filter: brightness(.4) saturate(.78);
+    }
+
+    .tunnel-stage.landing { opacity: 0; }
+    .tunnel-stage.gone { visibility: hidden; pointer-events: none; }
+
     .scene {
       position: relative;
       width: min(100vw, 56.28dvh);
       height: min(177.68vw, 100dvh);
       isolation: isolate;
       opacity: 0;
-      transform: translateY(-3.5%) scale(1.1);
-      transition: opacity .5s ease, transform 1.35s cubic-bezier(.2,.78,.28,1);
+      transform: scale(1.025);
+      transition: opacity .55s ease, transform .65s cubic-bezier(.2,.78,.28,1);
       box-shadow: 0 0 80px rgba(0,0,0,.55);
     }
 
@@ -277,6 +328,7 @@
       *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: .01ms !important; }
       .scene { transform: none; }
       .hotspot::after { transform: translateY(-50%); }
+      .tunnel-image { transform: none !important; filter: brightness(.94) saturate(.96) !important; }
     }
     @media (max-width: 500px) {
       .welcome { padding-inline: 1rem; }
@@ -297,6 +349,12 @@
       <button class="hotspot apps" id="appsHotspot" type="button" aria-label="Discover Apps and Software Projects — coming soon"></button>
     </section>
   </main>
+
+  <div class="tunnel-stage" id="tunnelStage" aria-label="A mossy rabbit hole leading into the garden">
+    <div class="tunnel-frame">
+      <img class="tunnel-image" src="assets/mossy-rabbit-hole.png" alt="A flower-lined mossy rabbit hole descending toward a dark, starry opening.">
+    </div>
+  </div>
 
   <div class="curtain-layer" id="curtainLayer" aria-label="Entrance curtain">
     <div class="curtain left" aria-hidden="true"></div>
@@ -359,6 +417,7 @@
   <script>
     (() => {
       const world = document.getElementById('world');
+      const tunnelStage = document.getElementById('tunnelStage');
       const curtains = document.getElementById('curtainLayer');
       const enterButton = document.getElementById('enterButton');
       const skipButton = document.getElementById('skipButton');
@@ -373,28 +432,51 @@
       let startX = 0;
       let progress = 0;
       let entering = false;
+      let landed = false;
+      const transitionTimers = [];
 
       const paint = () => curtains.style.setProperty('--part', progress.toFixed(3));
-      const finish = (instant = false) => {
+      const schedule = (callback, delay) => {
+        const timer = setTimeout(callback, delay);
+        transitionTimers.push(timer);
+      };
+      const focusGarden = () => modelingHotspot.focus({ preventScroll: true });
+      const landImmediately = () => {
+        if (landed) return;
+        landed = true;
+        transitionTimers.forEach(clearTimeout);
+        progress = 1;
+        paint();
+        curtains.classList.add('opening', 'gone');
+        tunnelStage.classList.add('gone');
+        world.classList.add('entered', 'ready');
+        skipButton.hidden = true;
+        requestAnimationFrame(focusGarden);
+      };
+      const finish = () => {
         if (entering) return;
         entering = true;
         progress = 1;
         paint();
         curtains.classList.add('opening');
-        skipButton.hidden = reduceMotion || instant;
-        if (reduceMotion || instant) {
-          curtains.classList.add('gone');
-          world.classList.add('entered', 'ready');
-          skipButton.hidden = true;
-          document.querySelector('.modeling').focus({ preventScroll: true });
+        if (reduceMotion) {
+          landImmediately();
           return;
         }
-        requestAnimationFrame(() => world.classList.add('entered'));
-        setTimeout(() => curtains.classList.add('gone'), 850);
-        setTimeout(() => {
+        skipButton.hidden = false;
+        requestAnimationFrame(() => tunnelStage.classList.add('descending'));
+        schedule(() => curtains.classList.add('gone'), 850);
+        schedule(() => {
+          world.classList.add('entered');
+          tunnelStage.classList.add('landing');
+        }, 1550);
+        schedule(() => {
+          landed = true;
           world.classList.add('ready');
+          tunnelStage.classList.add('gone');
           skipButton.hidden = true;
-        }, 1400);
+          focusGarden();
+        }, 2050);
       };
 
       curtains.addEventListener('pointerdown', (event) => {
@@ -418,7 +500,7 @@
         if (!entering && !event.target.closest('button') && !dragging) finish();
       });
       enterButton.addEventListener('click', () => finish());
-      skipButton.addEventListener('click', () => finish(true));
+      skipButton.addEventListener('click', () => landImmediately());
       addEventListener('keydown', (event) => {
         if (event.code === 'Space' && !entering && !event.target.matches('button, a')) {
           event.preventDefault();
