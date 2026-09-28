@@ -79,6 +79,7 @@
       color: #fff7dc;
       text-decoration: none;
       cursor: pointer;
+      padding: 0;
       opacity: 0;
       transform: translateY(8px);
       transition: opacity .45s ease, transform .45s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
@@ -198,8 +199,12 @@
     .note .keyhole { display: block; margin: 0 auto .8rem; color: var(--gold); font-size: 2.2rem; }
     .note h2 { margin: 0 0 .55rem; font-size: 1.55rem; font-weight: 400; }
     .note p { margin: 0 0 1.25rem; font-family: ui-sans-serif, system-ui, sans-serif; line-height: 1.55; color: #dce4da; }
-    .note button { min-height: 46px; padding: .65rem 1.2rem; border: 1px solid rgba(247,210,124,.58); border-radius: 999px; background: rgba(247,210,124,.1); cursor: pointer; }
-    .note button:focus-visible { outline: 2px solid #fff1bd; outline-offset: 3px; }
+    .note .actions { display: flex; flex-wrap: wrap; justify-content: center; gap: .7rem; }
+    .note button,
+    .note .portal-link { min-height: 46px; padding: .65rem 1.2rem; border: 1px solid rgba(247,210,124,.58); border-radius: 999px; background: rgba(247,210,124,.1); color: #f6efdc; cursor: pointer; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; }
+    .note .portal-link { background: rgba(247,210,124,.2); }
+    .note button:focus-visible,
+    .note .portal-link:focus-visible { outline: 2px solid #fff1bd; outline-offset: 3px; }
 
     @media (prefers-reduced-motion: reduce) {
       *, *::before, *::after { scroll-behavior: auto !important; animation: none !important; transition-duration: .01ms !important; }
@@ -219,8 +224,8 @@
   <main class="world" id="world" aria-label="Sky’s Little Internet Corner">
     <section class="scene" aria-label="Moonlit garden with three portfolio paths">
       <img class="garden" src="assets/garden.png" alt="A moonlit storybook garden with signs leading to modeling, social, and software projects.">
-      <a class="hotspot modeling" href="https://skykimportfolio.my.canva.site/" target="_blank" rel="noopener noreferrer" aria-label="Open Modeling Portfolio in a new tab"></a>
-      <a class="hotspot social" href="https://canva.link/3g93devirml6sk0" target="_blank" rel="noopener noreferrer" aria-label="Open Social Portfolio in a new tab"></a>
+      <button class="hotspot modeling" id="modelingHotspot" type="button" aria-label="Discover the Modeling Portfolio"></button>
+      <button class="hotspot social" id="socialHotspot" type="button" aria-label="Discover the Social Portfolio"></button>
       <button class="hotspot apps" id="appsHotspot" type="button" aria-label="Discover Apps and Software Projects — coming soon"></button>
     </section>
   </main>
@@ -236,12 +241,38 @@
   </div>
   <button class="skip" id="skipButton" type="button" hidden>Skip</button>
 
-  <dialog id="comingSoon" aria-labelledby="soonTitle">
+  <dialog id="modelingDialog" aria-labelledby="modelingTitle" aria-describedby="modelingDescription">
+    <div class="note">
+      <span class="keyhole" aria-hidden="true">◇</span>
+      <h2 id="modelingTitle">The modeling path</h2>
+      <p id="modelingDescription">A collection of my modeling work.</p>
+      <div class="actions">
+        <a class="portal-link" href="https://skykimportfolio.my.canva.site/" target="_blank" rel="noopener noreferrer">Enter the modeling portfolio</a>
+        <button id="closeModeling" type="button">Back to the garden</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="socialDialog" aria-labelledby="socialTitle" aria-describedby="socialDescription">
+    <div class="note">
+      <span class="keyhole" aria-hidden="true">✦</span>
+      <h2 id="socialTitle">The social path</h2>
+      <p id="socialDescription">A collection of my social work and creative campaigns.</p>
+      <div class="actions">
+        <a class="portal-link" href="https://canva.link/3g93devirml6sk0" target="_blank" rel="noopener noreferrer">Enter the social portfolio</a>
+        <button id="closeSocial" type="button">Back to the garden</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog id="comingSoon" aria-labelledby="soonTitle" aria-describedby="soonDescription">
     <div class="note">
       <span class="keyhole" aria-hidden="true">⌘</span>
       <h2 id="soonTitle">A little workshop is waking up.</h2>
-      <p>Apps &amp; software projects are coming soon.</p>
-      <button id="closeSoon" type="button">Back to the garden</button>
+      <p id="soonDescription">Apps &amp; software projects are coming soon.</p>
+      <div class="actions">
+        <button id="closeSoon" type="button">Back to the garden</button>
+      </div>
     </div>
   </dialog>
 
@@ -251,9 +282,9 @@
       const curtains = document.getElementById('curtainLayer');
       const enterButton = document.getElementById('enterButton');
       const skipButton = document.getElementById('skipButton');
+      const modelingHotspot = document.getElementById('modelingHotspot');
+      const socialHotspot = document.getElementById('socialHotspot');
       const appsHotspot = document.getElementById('appsHotspot');
-      const dialog = document.getElementById('comingSoon');
-      const closeSoon = document.getElementById('closeSoon');
       const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
       let dragging = false;
       let startX = 0;
@@ -312,11 +343,20 @@
         }
       });
 
-      appsHotspot.addEventListener('click', () => dialog.showModal());
-      closeSoon.addEventListener('click', () => dialog.close());
-      dialog.addEventListener('click', (event) => {
-        if (event.target === dialog) dialog.close();
-      });
+      const setupDialog = (trigger, dialogId, closeId) => {
+        const dialog = document.getElementById(dialogId);
+        const closeButton = document.getElementById(closeId);
+        trigger.addEventListener('click', () => dialog.showModal());
+        closeButton.addEventListener('click', () => dialog.close());
+        dialog.addEventListener('click', (event) => {
+          if (event.target === dialog) dialog.close();
+        });
+        dialog.addEventListener('close', () => trigger.focus({ preventScroll: true }));
+      };
+
+      setupDialog(modelingHotspot, 'modelingDialog', 'closeModeling');
+      setupDialog(socialHotspot, 'socialDialog', 'closeSocial');
+      setupDialog(appsHotspot, 'comingSoon', 'closeSoon');
     })();
   </script>
 </body>
